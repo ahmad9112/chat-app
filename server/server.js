@@ -70,7 +70,7 @@ const server = http.createServer(app);
 // ✅ Allowed Origins (Local + Production Frontend)
 const allowedOrigins = [
     "http://localhost:5173",                // Local development
-    "https://chat-app-ysm2.onrender.com"      // <-- Replace with your actual frontend URL
+    "https://your-frontend.vercel.app"      // <-- Replace with your actual frontend URL
 ];
 
 // ✅ Configure CORS
