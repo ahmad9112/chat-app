@@ -47,7 +47,6 @@
 //     res.status(401).json({ success: false, message: "Invalid or expired token" });
 //   }
 // };
-
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
@@ -55,17 +54,13 @@ export const protectRoute = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    // ✅ Check if Authorization header is present and valid
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ success: false, message: "No token provided" });
+      return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
     }
 
-    const token = authHeader.split(" ")[1]; // ✅ Extract the token part
-
-    // ✅ Verify JWT
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Fetch user
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -73,9 +68,8 @@ export const protectRoute = async (req, res, next) => {
 
     req.user = user;
     next();
-  } catch (error) {
-    console.log("Auth error:", error.message);
-    res.status(401).json({ success: false, message: "Invalid or expired token" });
+  } catch (err) {
+    console.error("JWT Auth Error:", err.message);
+    res.status(401).json({ success: false, message: "Unauthorized: Invalid or expired token" });
   }
 };
-
