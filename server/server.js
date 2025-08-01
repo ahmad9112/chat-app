@@ -70,7 +70,7 @@ const server = http.createServer(app);
 // ✅ Allowed Origins (Local + Production Frontend)
 const allowedOrigins = [
     "http://localhost:5173",                // Local development
-    "https://your-frontend.vercel.app"      // <-- Replace with your actual frontend URL
+    "https://chat-app-alpha-ivory.vercel.app/login"      // <-- Replace with your actual frontend URL
 ];
 
 // ✅ Configure CORS
