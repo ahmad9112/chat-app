@@ -67,49 +67,61 @@ import { Server } from 'socket.io';
 const app = express();
 const server = http.createServer(app);
 
+// ✅ Allowed Origins (Local + Production Frontend)
+const allowedOrigins = [
+    "http://localhost:5173",                // Local development
+    "https://your-frontend.vercel.app"      // <-- Replace with your actual frontend URL
+];
+
+// ✅ Configure CORS
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS Not Allowed"));
+        }
+    },
+    credentials: true
+}));
+
 // ✅ Socket.io setup
 export const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: { origin: allowedOrigins, credentials: true }
 });
 
-export const userSocketMap = {}; // {userId: socketId}
+export const userSocketMap = {}; // { userId: socketId }
 
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId;
-    console.log("User Connected", userId);
+    console.log("✅ User Connected:", userId);
 
     if (userId) userSocketMap[userId] = socket.id;
 
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
     socket.on("disconnect", () => {
-        console.log("User Disconnected", userId);
+        console.log("❌ User Disconnected:", userId);
         delete userSocketMap[userId];
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 });
 
-// ✅ Middleware setup
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
-
+// ✅ Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ✅ Routes Setup
-app.use("/api/status", (req, res) => res.send("Server is Live"));
+// ✅ Routes
+app.use("/api/status", (req, res) => res.send("✅ Server is Live"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 
 // ✅ Connect to MongoDB
 await connectDB();
 
-if(process.env.NODE_ENV!=="production"){
+// ✅ Always start server (even in production)
 const PORT = process.env.PORT || 5000;
-      server.listen(PORT, () => console.log(`✅ Server running on PORT: ${PORT}`));
-}
-//Export server for Vercel
-export default server;
+server.listen(PORT, () => console.log(`🚀 Server running on PORT: ${PORT}`));
 
+// ✅ Export server for Vercel
+export default server;
